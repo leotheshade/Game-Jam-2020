@@ -13,8 +13,8 @@ var num = 0;
 var targetInterval = 0;
 var netDamage = 0;
 var combo = 0;
-var spearSmoke = new smokeCreature("spear",10, 15);
-var swordSmoke = new smokeCreature("sword",10, 20);
+var spearSmoke = new smokeCreature("spear",10, 20);
+var swordSmoke = new smokeCreature("sword",10, 25);
 var boss = new demon()
 var ready = false;
 var slashes = [];
@@ -28,37 +28,124 @@ var slash = {x1:0,y1:0,x2:0,y2:0}
 var animSlash = {x1:0,y1:0,x2:0,y2:0}
 var demonBuffs = ["barrier","minion","haze","speed"];
 var gameOver = false;
+var idleRonin;
+var stuff;
+var song;
+var songs = [];
+var si;
+var pic;
+var spi;
+var numHit = 0;
+var selectedIndex = 0;
  document.addEventListener("keydown", function(e) {
     if (e.keyCode == 13 && document.fullscreenElement === null) {
       document.getElementById("mainScreen").requestFullscreen();
+        console.log(selectedIndex)
+         songs[selectedIndex].play();
+    songs[selectedIndex].loop()
          
     }
   }, false);
 
-function setup() {
-    canvas = createCanvas(windowWidth, windowHeight);
+function makeAnimationArrayFromRoot(root,frames){
+    var tempArray = []
+    for(var i = 0; i<frames;i++){
+        var tempRoot = root;
+        if(i < 10){
+            tempRoot += "0"
+        }
+        tempArray.push(tempRoot + i)
+    }
+    return tempArray;
+}
+function preload(){
+    selectedIndex = Math.floor(random(0,4))
+//    si = loadImage('assets/icons/IMG_2286.png')
+//    pic = loadImage('asssets/icons/IMG_2287.png')
+    
+    song = loadSound("assets/FailtheFuture.mp3")
+    songs.push(loadSound("assets/BattleofBurns.mp3"))
+    songs.push(loadSound("assets/Chosenfortrial.mp3"))
+    songs.push(loadSound("assets/FieldsofFallen.mp3"))
+    songs.push(loadSound("assets/PathofFew.mp3"))
+    stuff = loadImage("assets/gbg/sprite_0.png")
+//    idleRonin = loadAnimation('assets/IDLEronin/sprite_00.png','assets/IDLEronin/sprite_09.png')
     characterSprite = createSprite(300,500,500,500)
+    characterSprite.addAnimation('idle','assets/IDLEronin/sprite_00.png','assets/IDLEronin/sprite_09.png')
+     characterSprite.addAnimation('slash','assets/ACTIVE1ronin/sprite_00.png','assets/ACTIVE1ronin/sprite_01.png','assets/ACTIVE1ronin/sprite_02.png','assets/ACTIVE1ronin/sprite_03.png','assets/ACTIVE1ronin/sprite_04.png','assets/ACTIVE1ronin/sprite_05.png','assets/ACTIVE1ronin/sprite_06.png','assets/ACTIVE1ronin/sprite_07.png','assets/ACTIVE1ronin/sprite_08.png','assets/ACTIVE1ronin/sprite_09.png','assets/ACTIVE1ronin/sprite_10.png','assets/ACTIVE1ronin/sprite_11.png','assets/ACTIVE1ronin/sprite_12.png','assets/ACTIVE1ronin/sprite_13.png')
+    characterSprite.addAnimation('stab', 'assets/ACTIVE2ronin/sprite_00.png','assets/ACTIVE2ronin/sprite_01.png','assets/ACTIVE2ronin/sprite_02.png','assets/ACTIVE2ronin/sprite_03.png','assets/ACTIVE2ronin/sprite_04.png','assets/ACTIVE2ronin/sprite_05.png','assets/ACTIVE2ronin/sprite_06.png','assets/ACTIVE2ronin/sprite_07.png','assets/ACTIVE2ronin/sprite_08.png','assets/ACTIVE2ronin/sprite_09.png','assets/ACTIVE2ronin/sprite_10.png','assets/ACTIVE2ronin/sprite_11.png','assets/ACTIVE2ronin/sprite_12.png','assets/ACTIVE2ronin/sprite_13.png')
+    smokeDoubleSprite = createSprite(600,500,500,500)
+    smokeDoubleSprite.addAnimation('idle','assets/IDLEroninclone/sprite_00.png','assets/IDLEroninclone/sprite_09.png')
+    
+    smokeDoubleSprite.addAnimation('slash','assets/ACTIVE1roninclone/sprite_000.png','assets/ACTIVE1roninclone/sprite_001.png','assets/ACTIVE1roninclone/sprite_002.png','assets/ACTIVE1roninclone/sprite_003.png','assets/ACTIVE1roninclone/sprite_004.png','assets/ACTIVE1roninclone/sprite_005.png','assets/ACTIVE1roninclone/sprite_006.png','assets/ACTIVE1roninclone/sprite_007.png','assets/ACTIVE1roninclone/sprite_008.png','assets/ACTIVE1roninclone/sprite_009.png','assets/ACTIVE1roninclone/sprite_010.png','assets/ACTIVE1roninclone/sprite_011.png','assets/ACTIVE1roninclone/sprite_012.png','assets/ACTIVE1roninclone/sprite_013.png')
+    smokeDoubleSprite.addAnimation('stab', 'assets/ACTIVE2roninclone/sprite_00.png','assets/ACTIVE2roninclone/sprite_01.png','assets/ACTIVE2roninclone/sprite_02.png','assets/ACTIVE2roninclone/sprite_03.png','assets/ACTIVE2roninclone/sprite_04.png','assets/ACTIVE2roninclone/sprite_05.png','assets/ACTIVE2roninclone/sprite_06.png','assets/ACTIVE2roninclone/sprite_07.png','assets/ACTIVE2roninclone/sprite_08.png','assets/ACTIVE2roninclone/sprite_09.png','assets/ACTIVE2roninclone/sprite_10.png','assets/ACTIVE2roninclone/sprite_11.png','assets/ACTIVE2roninclone/sprite_12.png','assets/ACTIVE2roninclone/sprite_13.png')//adjust size
+    characterSprite.scale = 0.8;
+    smokeDoubleSprite.scale = 0.8
+        demonSprite = createSprite(1200,450,500,500)
+    demonSprite.scale = 1.5;
+    demonSprite.addAnimation('idle','assets/IDLEdemonBoss/sprite_00.png','assets/IDLEdemonBoss/sprite_01.png','assets/IDLEdemonBoss/sprite_02.png','assets/IDLEdemonBoss/sprite_03.png','assets/IDLEdemonBoss/sprite_04.png','assets/IDLEdemonBoss/sprite_05.png','assets/IDLEdemonBoss/sprite_06.png','assets/IDLEdemonBoss/sprite_07.png','assets/IDLEdemonBoss/sprite_08.png','assets/IDLEdemonBoss/sprite_09.png','assets/IDLEdemonBoss/sprite_10.png','assets/IDLEdemonBoss/sprite_11.png','assets/IDLEdemonBoss/sprite_12.png','assets/IDLEdemonBoss/sprite_13.png','assets/IDLEdemonBoss/sprite_14.png','assets/IDLEdemonBoss/sprite_15.png','assets/IDLEdemonBoss/sprite_16.png')
+    demonSprite.addAnimation('slash','assets/ACTIVE1demonbossclone/sprite_00.png','assets/ACTIVE1demonbossclone/sprite_01.png','assets/ACTIVE1demonbossclone/sprite_02.png','assets/ACTIVE1demonbossclone/sprite_03.png','assets/ACTIVE1demonbossclone/sprite_04.png','assets/ACTIVE1demonbossclone/sprite_05.png','assets/ACTIVE1demonbossclone/sprite_06.png','assets/ACTIVE1demonbossclone/sprite_07.png','assets/ACTIVE1demonbossclone/sprite_08.png','assets/ACTIVE1demonbossclone/sprite_09.png','assets/ACTIVE1demonbossclone/sprite_10.png','assets/ACTIVE1demonbossclone/sprite_11.png','assets/ACTIVE1demonbossclone/sprite_12.png','assets/ACTIVE1demonbossclone/sprite_13.png','assets/ACTIVE1demonbossclone/sprite_14.png','assets/ACTIVE1demonbossclone/sprite_15.png','assets/ACTIVE1demonbossclone/sprite_16.png','assets/ACTIVE1demonbossclone/sprite_17.png','assets/ACTIVE1demonbossclone/sprite_18.png','assets/ACTIVE1demonbossclone/sprite_19.png','assets/ACTIVE1demonbossclone/sprite_20.png','assets/ACTIVE1demonbossclone/sprite_21.png','assets/ACTIVE1demonbossclone/sprite_22.png','assets/ACTIVE1demonbossclone/sprite_23.png','assets/ACTIVE1demonbossclone/sprite_24.png','assets/ACTIVE1demonbossclone/sprite_25.png','assets/ACTIVE1demonbossclone/sprite_26.png','assets/ACTIVE1demonbossclone/sprite_27.png','assets/ACTIVE1demonbossclone/sprite_28.png','assets/ACTIVE1demonbossclone/sprite_29.png');
+
+    characterSprite.addAnimation('death', 'assets/RIPronin/sprite_00.png', 'assets/RIPronin/sprite_01.png', 'assets/RIPronin/sprite_02.png', 'assets/RIPronin/sprite_03.png', 'assets/RIPronin/sprite_04.png', 'assets/RIPronin/sprite_05.png', 'assets/RIPronin/sprite_06.png', 'assets/RIPronin/sprite_07.png', 'assets/RIPronin/sprite_08.png', 'assets/RIPronin/sprite_09.png', 'assets/RIPronin/sprite_10.png', 'assets/RIPronin/sprite_11.png', 'assets/RIPronin/sprite_12.png', 'assets/RIPronin/sprite_13.png', 'assets/RIPronin/sprite_14.png', 'assets/RIPronin/sprite_15.png', 'assets/RIPronin/sprite_16.png', 'assets/RIPronin/sprite_17.png', 'assets/RIPronin/sprite_18.png', 'assets/RIPronin/sprite_19.png', 'assets/RIPronin/sprite_20.png')
+
+smokeDoubleSprite.addAnimation('death', 'assets/RIProninclone/sprite_00.png', 'assets/RIProninclone/sprite_01.png', 'assets/RIProninclone/sprite_02.png', 'assets/RIProninclone/sprite_03.png', 'assets/RIProninclone/sprite_04.png', 'assets/RIProninclone/sprite_05.png', 'assets/RIProninclone/sprite_06.png', 'assets/RIProninclone/sprite_07.png', 'assets/RIProninclone/sprite_08.png', 'assets/RIProninclone/sprite_09.png', 'assets/RIProninclone/sprite_10.png', 'assets/RIProninclone/sprite_11.png', 'assets/RIProninclone/sprite_12.png', 'assets/RIProninclone/sprite_13.png', 'assets/RIProninclone/sprite_14.png', 'assets/RIProninclone/sprite_15.png', 'assets/RIProninclone/sprite_16.png', 'assets/RIProninclone/sprite_17.png', 'assets/RIProninclone/sprite_18.png', 'assets/RIProninclone/sprite_19.png', 'assets/RIProninclone/sprite_20.png')
+    
+//    smokeDoubleSprite.animation.frameDelay = 2;
+//    smokeDoubleSprite.changeAnimation('slash')
+
+
+
+}
+function setup() {
+    
+    canvas = createCanvas(windowWidth, windowHeight);
+//    frameRate(60)
+//    characterSprite = createSprite(300,500,500,500)
 //    smokeNinjaSprite = createSprite(600,500,500,500)//need to position later
 //    smokeNinjaSprite.visible = false;
 //    smokeSamuraiSprite = createSprite(600,500,500,500);
 //    smokeSamuraiSprite.visible = false;
-    smokeDoubleSprite = createSprite(600,500,500,500)
+//    smokeDoubleSprite = createSprite(600,500,500,500)
 //    smokeBoxerSprite.visible = false; 
-    demonSprite = createSprite(1200,500,500,500)
+//    characterSprite.addAnimation('idle','assets/IDLEronin/sprite_00.png','assets/IDLEronin/sprite_09.png')
+//    declareAnimations()
+   
     
 }
 
 function draw() {
     resizeCanvas(windowWidth, windowHeight);
     background("green");
-    if(!gameOver){
+    
+    if(bossFight.phase !== "dead"){
     push();
     if(bossFight.playerTurn && bossFight.phase == "planning"){
     translate((width/2 - mouseX)/30,0);
     }
+        push()
+//    scale(0.5)
+    image(stuff,-30,0,width+60,height)
+    pop()
     
     drawSprites();
-    pop();
+        if((smokeDoubleSprite.getAnimationLabel() == "slash" || smokeDoubleSprite.getAnimationLabel() == "stab") && smokeDoubleSprite.animation.getFrame() == smokeDoubleSprite.animation.getLastFrame()){
+                        smokeDoubleSprite.animation.changeFrame(0)
+            smokeDoubleSprite.scale = 0.8;
+
+            smokeDoubleSprite.changeAnimation('idle')
+            
+        }
+        if(demonSprite.getAnimationLabel() == "slash" && demonSprite.animation.getFrame() == demonSprite.animation.getLastFrame()){
+            demonSprite.animation.changeFrame(0)
+            demonSprite.changeAnimation('idle')
+        }
+if((characterSprite.getAnimationLabel() == "slash" || characterSprite.getAnimationLabel() == "stab") && characterSprite.animation.getFrame() == characterSprite.animation.getLastFrame()){
+                        characterSprite.animation.changeFrame(0)
+            characterSprite.scale = 0.8;
+
+            characterSprite.changeAnimation('idle')
+            
+        }    pop();
     fill("red");
     if(bossFight.playerTurn && bossFight.phase == "planning"){
     ellipse(width/2 - 300,750,100,100)//pipe
@@ -102,7 +189,7 @@ function draw() {
             fill("red");
             textSize(60);
             text(i.num,i.x-15,i.y+20)
-        i.timeSize += 1.25 * i.speedBonus;
+        i.timeSize += 1.5 * i.speedBonus;
         if(i.timeSize > 100){
             i.active = false;
             netDamage += (boss.attack + boss.attackBonus)*(character.smokePierceDefence + random(-2,0)/10)
@@ -183,6 +270,8 @@ function draw() {
     fill("black")
     textSize(60);
     text("Game Over", width/2,height/2)
+        drawSprites()
+
 }
 }
 function createSelection(x,y,w,h,operation){
@@ -194,9 +283,9 @@ function createSelection(x,y,w,h,operation){
     
 }
 function demon(){
-    this.health = 2000;
-    this.attack = 15;
-    this.phase = 2;
+    this.health = 1000;
+    this.attack = 14;
+    this.phase = 1;
     this.pierceDefence = 1;
     this.slashDefence = 1;
     this.buff = false;
@@ -247,11 +336,19 @@ function targetLoop(){
 function slashLoop(){
     thetaI = random(0,360);
     theta = random(0,360);
+    while(dist(cos(thetaI)*200+1200,sin(thetaI)*200+500,cos(theta)*200+1200,sin(theta)*200+500) < 50){
+        thetaI = random(0,360);
+        theta = random(0,360)
+    }
     slashes.push(new makeSlash(cos(thetaI)*200+1200,sin(thetaI)*200+500,cos(theta)*200+1200,sin(theta)*200+500,currentNum));
 }
 function demonSlashLoop(){
     thetaI = random(0,360);
     theta = random(0,360);
+    while(dist(cos(thetaI)*200+600,sin(thetaI)*200+500,cos(theta)*200+600,sin(theta)*200+500) < 50){
+        thetaI = random(0,360);
+        theta = random(0,360)
+    }
     slashes.push(new makeSlash(cos(thetaI)*200+600,sin(thetaI)*200+500,cos(theta)*200+600,sin(theta)*200+500,currentNum))
     if(currentNum < num){
         setTimeout(demonSlashLoop,targetInterval)
@@ -340,8 +437,9 @@ currentNum = 0;
     boss.attackBonus = 0;
     if(boss.buff == "speed"){
         attackSpeedBonus = -100;
+        attackCountBonus  += 2;
         if(boss.swordCountered){
-            attackCountBonus = -1;
+            attackCountBonus += -1;
         }
     }
     if(boss.buff == "barrier"){
@@ -392,6 +490,13 @@ function generateSlashes(){
                           }
                 Math.floor(netDamage);
                 boss.health -= netDamage;
+                          if(character.smoke){
+                smokeDoubleSprite.changeAnimation('slash')
+                smokeDoubleSprite.animation.frameDelay = 2;
+                          }else{
+                              characterSprite.changeAnimation('slash');
+                              characterSprite.animation.frameDelay = 2;
+                          }
                 transitionToDemon();
                 bossFight.phase = "damage";
                          transitionToDemon()
@@ -420,14 +525,44 @@ function smokeCreature(tag,defence,attack){
     this.alive = true;
 }
 function transitionToDemon(){
-    setTimeout(function(){bossFight.phase = "planning";bossFight.playerTurn = false;transitionToDefend();if(boss.buff === false && boss.buffSickness === false){boss.buff = random(demonBuffs)}},2000)
+    setTimeout(function(){bossFight.phase = "planning";
+                          bossFight.playerTurn = false;
+                          num = 0;
+                          slashes = [];
+                          punchTargets = [];
+                          currentNum = 0;
+                          combo = 0;
+                          ready = false;
+                          transitionToDefend();
+                          if(boss.buff === false && boss.buffSickness === false){
+                              boss.buff = random(demonBuffs)
+                          }
+                          if(boss.health < 500 && boss.phase == 1){
+                              boss.phase = 2;
+                              //transition
+                          }else if(boss.health <=0){
+                              boss.phase = "dead"
+                          }
+                         },2000)
 }
 function transitionToDefend(){
-    setTimeout(function(){bossFight.phase = "combat";currentNum = 0;num = 0;combo = 0;if(boss.phase == 1){generateDemonSlashes()}else if(boss.phase == 2){generateDemonTargets()}},500);
+    setTimeout(function(){if(!(boss.phase == "dead")){bossFight.phase = "combat";slashes = [];punchTargets = [];currentNum = 0;num = 0;combo = 0;ready = false;if(boss.phase == 1){generateDemonSlashes()}else if(boss.phase == 2){generateDemonTargets()}}},500);
 }
-function transitionToDeath(){bossFight.phase = "dead"}
+function transitionToDeath(){bossFight.phase = "dead";
+                            characterSprite.changeAnimation('death')
+                             characterSprite.animation.looping = false
+                             characterSprite.animation.frameDelay = 8;
+                             demonSprite.visible = false;
+                             songs[selectedIndex].pause()
+                             song.play()
+                             song.loop()
+                            }
 function transitionToPlayer(){
-    setTimeout(function(){bossFight.phase = "planning";bossFight.playerTurn = true;if(character.smokeHealth <= 0){character.smoke = false;smokeDoubleSprite.visible = false;characterSprite.x = 600}},2000)
+    if(character.smokeHealth<=0 && character.smoke){
+        smokeDoubleSprite.changeAnimation('death')
+        smokeDoubleSprite.animation.looping = false;
+    }
+    setTimeout(function(){bossFight.phase = "planning";ready=false;num = 0; currentNum = 0;bossFight.playerTurn = true;if(character.smokeHealth <= 0){character.smoke = false;smokeDoubleSprite.visible = false;characterSprite.position.x = 600}},2000)
 }
 function mousePressed(){
     if(bossFight.playerTurn && bossFight.phase == "planning"){
@@ -456,7 +591,7 @@ function mousePressed(){
     }else if(bossFight.phase == "combat" && bossFight.playerTurn){
         if(character.currentCreature == "boxer"){
         for(var i of punchTargets){
-            if(collidePointCircle(mouseX,mouseY,i.x,i.y,100)){
+            if(collideCircleCircle(mouseX,mouseY,30,i.x,i.y,100)){
                 i.active = false;
                 if(i.timeSize < 90){
                     netDamage += spearSmoke.damage * 0.8 * (boss.pierceDefence+boss.pierceDefenceBonus + random(-2,0)/10);
@@ -468,13 +603,22 @@ function mousePressed(){
 //                    combo += 1;
                     netDamage += spearSmoke.damage * 0.7 * (boss.pierceDefence+boss.pierceDefenceBonus + random(-2,0)/10);
                 }else{
-                    if(combo > 0)
-                    combo -= 1;
+                    if(combo > 0){}
+//                    combo -= 1;
                 }
             }
         }
         if(punchTargets.every(function(e){return !e.active}) && ready){
             punchTargets = [];
+            if(character.smoke){
+            smokeDoubleSprite.changeAnimation('stab')
+            smokeDoubleSprite.animation.frameDelay = 2;
+            smokeDoubleSprite.scale = 1;
+            }else{
+                characterSprite.changeAnimation('stab')
+            characterSprite.animation.frameDelay = 2;
+            characterSprite.scale = 1;
+            }
             setTimeout(function(){
                 ready = false;
 //                console.log(combo)
@@ -512,6 +656,8 @@ function mousePressed(){
             }
             }if(punchTargets.every(function(e){return !e.active}) && ready){
             punchTargets = [];
+                demonSprite.changeAnimation('slash')
+            demonSprite.animation.frameDelay = 3;
             setTimeout(function(){
                 if(character.smoke){
                 ready = false;
@@ -542,18 +688,19 @@ function mouseReleased(){
         slash.y2 = mouseY;
             for(var g of slashes){
                 if(g.active){
-                    if(collideLineCircle(slash.x1,slash.y1,slash.x2,slash.y2,g.x1,g.y1,30) && collideLineCircle(slash.x1,slash.y1,slash.x2,slash.y2,g.x2,g.y2,30)){
+                    if(collideLineCircle(slash.x1,slash.y1,slash.x2,slash.y2,g.x1,g.y1,60) && collideLineCircle(slash.x1,slash.y1,slash.x2,slash.y2,g.x2,g.y2,60)){
             netDamage += swordSmoke.damage * (boss.slashDefence + random(-2,0)/10)
             combo += 2
-        }else if(collideLineCircle(slash.x1,slash.y1,slash.x2,slash.y2,g.x1,g.y1,50) && collideLineCircle(slash.x1,slash.y1,slash.x2,slash.y2,g.x2,g.y2,50)){
-            netDamage += swordSmoke.damage * 0.8 * (boss.slashDefence + random(-2,0)/10)
-            combo += 1;
-        }else if(collideLineCircle(slash.x1,slash.y1,slash.x2,slash.y2,g.x1,g.y1,60) && collideLineCircle(slash.x1,slash.y1,slash.x2,slash.y2,g.x2,g.y2,60)){
-            netDamage += swordSmoke.damage * 0.7 * (boss.slashDefence + random(-2,0)/10)
-            combo += 1;
-        }else{
-            combo -= 1;
         }
+//                    else if(collideLineCircle(slash.x1,slash.y1,slash.x2,slash.y2,g.x1,g.y1,50) && collideLineCircle(slash.x1,slash.y1,slash.x2,slash.y2,g.x2,g.y2,50)){
+//            netDamage += swordSmoke.damage * 0.8 * (boss.slashDefence + random(-2,0)/10)
+//            combo += 1;
+//        }else if(collideLineCircle(slash.x1,slash.y1,slash.x2,slash.y2,g.x1,g.y1,60) && collideLineCircle(slash.x1,slash.y1,slash.x2,slash.y2,g.x2,g.y2,60)){
+//            netDamage += swordSmoke.damage * 0.7 * (boss.slashDefence + random(-2,0)/10)
+//            combo += 1;
+//        }else{
+////            combo -= 1;
+//        }
             }
         }
             if(!timeup){
@@ -580,6 +727,8 @@ function mouseReleased(){
         }
         if(slashes.every(function(e){return !e.active}) && ready){
             slashes = [];
+            demonSprite.changeAnimation('slash')
+            demonSprite.animation.frameDelay = 3;
             setTimeout(function(){
                 if(character.smoke){
                 character.smokeHealth -= Math.floor(netDamage);
@@ -588,6 +737,7 @@ function mouseReleased(){
                 transitionToPlayer();
                 }else if(Math.floor(netDamage) > 0){
 //                    gameOver = true;
+//                    console.log("E")
                     bossFight.phase = "damage";
                     transitionToDeath();
                 }else{
