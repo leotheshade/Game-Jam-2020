@@ -102,9 +102,10 @@ function draw() {
             fill("red");
             textSize(60);
             text(i.num,i.x-15,i.y+20)
-        i.timeSize += 1.5 * i.speedBonus;
+        i.timeSize += 1.25 * i.speedBonus;
         if(i.timeSize > 100){
             i.active = false;
+            netDamage += (boss.attack + boss.attackBonus)*(character.smokePierceDefence + random(-2,0)/10)
         }
         pop();
             }
@@ -130,14 +131,14 @@ function draw() {
         else if(g.slashSize <0){
             g.active = false;
 //            character.smokeHealth -= g.attack * (character.smokeSlashDefence - random(-2,0)/10)
-            netDamage +=  boss.attack * (character.smokeSlashDefence + random(-2,0)/10)
+            netDamage +=  (boss.attack + boss.attackBonus) * (character.smokeSlashDefence + random(-2,0)/10)
         }
         pop()
         }
     }
     
     if(bossFight.phase == "combat"){
-        if(mouseIsPressed && slash.x1 != 0 && (character.currentCreature == "samurai" || (!bossFight.playerTurn && boss.phase == 1))){
+        if(mouseIsPressed && slash.x1 != 0 && ((character.currentCreature == "samurai" && bossFight.playerTurn) || (!bossFight.playerTurn && boss.phase == 1))){
             push()
             strokeWeight(10)
             stroke("white")
@@ -327,7 +328,7 @@ function generateDemonTargets(){
     boss.swordCountered = false;
     boss.buffSickness = false;
     num = random(5+attackCountBonus,6+attackCountBonus);
-    targetInterval = random(500 + attackSpeedBonus,600 + attackSpeedBonus);
+    targetInterval = random(600 + attackSpeedBonus,700 + attackSpeedBonus);
     setTimeout(demonTargetLoop(),targetInterval);
 }
 function generateDemonSlashes(){
@@ -512,19 +513,20 @@ function mousePressed(){
             }if(punchTargets.every(function(e){return !e.active}) && ready){
             punchTargets = [];
             setTimeout(function(){
-                if(character.smoke){}
+                if(character.smoke){
                 ready = false;
-                Math.floor(netDamage);
-                if(netDamage > 70 && boss.buff !== false){
-                    boss.spearCountered = true;
-                    if(boss.buff == "speed" || boss.buff == "haze" || boss.buff == "barrier"){
-                        boss.buffSickness = boss.buff;
-                        boss.buff = false;
-                    }
-                }
-                boss.health -= netDamage;
+                 character.smokeHealth -= Math.floor(netDamage);
                 bossFight.phase = "damage";
-                transitionToDemon();
+                transitionToPlayer();
+            }else if(Math.floor(netDamage) > 0){
+                bossFight.phase = "damage";
+                transitionToDeath()
+            }else{
+                ready = false;
+                bossFight.phase = "damage";
+//                transitionToDemon();
+                transitionToPlayer()
+                }
             },500)
         }
         }
@@ -584,7 +586,7 @@ function mouseReleased(){
                     ready = false;
                 bossFight.phase = "damage";
                 transitionToPlayer();
-                }else if(Math.floor(netDamage > 0)){
+                }else if(Math.floor(netDamage) > 0){
 //                    gameOver = true;
                     bossFight.phase = "damage";
                     transitionToDeath();
