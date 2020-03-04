@@ -39,6 +39,9 @@ var numHit = 0;
 var selectedIndex = 0;
 var gameStarted = false;
 var titleScreen;
+var demonAbilitySprite;
+var mainGroup;
+var abilityGroup;
 String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 }
@@ -71,7 +74,8 @@ function preload(){
     pipe= loadImage('assets/icons/pipe.png')
     spear = loadImage('assets/icons/spear.png')
 
-    
+    abilityGroup = new Group()
+    mainGroup = new Group()
     song = loadSound("assets/FailtheFuture.mp3")
     songs.push(loadSound("assets/BattleofBurns.mp3"))
     songs.push(loadSound("assets/Chosenfortrial.mp3"))
@@ -104,6 +108,20 @@ smokeDoubleSprite.addAnimation('death', 'assets/RIProninclone/sprite_00.png', 'a
 //    smokeDoubleSprite.animation.frameDelay = 2;
 //    smokeDoubleSprite.changeAnimation('slash')
 
+    demonAbilitySprite = createSprite(1200,450,500,500)
+    demonAbilitySprite.scale = 1.5;
+    demonAbilitySprite.addAnimation("minion",'assets/Army/sprite_00.png','assets/Army/sprite_09.png');
+    demonAbilitySprite.addAnimation("armyIdle",'assets/ArmyIdle/sprite_00.png','assets/ArmyIdle/sprite_11.png');
+    demonAbilitySprite.addAnimation("haze",'assets/HazySmoke/sprite_0.png','assets/HazySmoke/sprite_3.png');
+    demonAbilitySprite.addAnimation("barrier",'assets/Shield/sprite_00.png','assets/Shield/sprite_09.png');
+    demonAbilitySprite.addAnimation("barrierIdle",'assets/Shield/sprite_09.png');
+    demonAbilitySprite.addAnimation("speed",'assets/Whirlwind/sprite_0.png','assets/Whirlwind/sprite_3.png');
+    demonAbilitySprite.addAnimation("speedIdle",'assets/WhirlwindIdle/sprite_0.png','assets/WhirlwindIdle/sprite_2.png')
+    demonAbilitySprite.visible = false;
+    characterSprite.addToGroup(mainGroup);
+    smokeDoubleSprite.addToGroup(mainGroup);
+    demonSprite.addToGroup(mainGroup);
+    demonAbilitySprite.addToGroup(abilityGroup);
 
 
 }
@@ -117,6 +135,7 @@ function setup() {
 //    titleScreen.width = width;
 //    titleScreen.height = height;
     titleScreen.animation.frameDelay = 12;
+    titleScreen.addToGroup(mainGroup)
 //    frameRate(60)
 //    characterSprite = createSprite(300,500,500,500)
 //    smokeNinjaSprite = createSprite(600,500,500,500)//need to position later
@@ -145,7 +164,11 @@ function draw() {
     image(stuff,-30,0,width+60,height)
     pop()
     
-    drawSprites();
+    drawSprites(mainGroup);
+        push()
+        tint(255,75)
+        drawSprites(abilityGroup)
+        pop()
         if((smokeDoubleSprite.getAnimationLabel() == "slash" || smokeDoubleSprite.getAnimationLabel() == "stab") && smokeDoubleSprite.animation.getFrame() == smokeDoubleSprite.animation.getLastFrame()){
                         smokeDoubleSprite.animation.changeFrame(0)
             smokeDoubleSprite.scale = 0.8;
@@ -164,6 +187,19 @@ if((characterSprite.getAnimationLabel() == "slash" || characterSprite.getAnimati
             characterSprite.changeAnimation('idle')
             
         }    pop();
+        
+        if(demonAbilitySprite.getAnimationLabel() == "minion" && demonAbilitySprite.animation.getFrame() == demonAbilitySprite.animation.getLastFrame()){
+            demonAbilitySprite.animation.changeFrame(0);
+            demonAbilitySprite.changeAnimation("armyIdle")
+        }
+        if(demonAbilitySprite.getAnimationLabel() == "barrier" && demonAbilitySprite.animation.getFrame() == demonAbilitySprite.animation.getLastFrame()){
+            demonAbilitySprite.animation.changeFrame(0);
+            demonAbilitySprite.changeAnimation("barrierIdle")
+        }
+        if(demonAbilitySprite.getAnimationLabel() == "speed" && demonAbilitySprite.animation.getFrame() == demonAbilitySprite.animation.getLastFrame()){
+            demonAbilitySprite.animation.changeFrame(0);
+            demonAbilitySprite.changeAnimation("speedIdle")
+        }
     fill("red");
     if(bossFight.playerTurn && bossFight.phase == "planning"){
     ellipse(width/2 - 300,750,100,100)//pipe
@@ -172,7 +208,7 @@ if((characterSprite.getAnimationLabel() == "slash" || characterSprite.getAnimati
         if(character.currentCreature == "boxer"){
             image(spear,width/2-120,630,250,250)
         }else if(character.currentCreature == "samurai"){
-            console.log("ss")
+//            console.log("ss")
             image(sword,width/2-140,590,300,300)
 
         }
@@ -321,7 +357,7 @@ function createSelection(x,y,w,h,operation){
     
 }
 function demon(){
-    this.health = 100;
+    this.health = 1000;
     this.attack = 14;
     this.phase = 1;
     this.pierceDefence = 1;
@@ -432,6 +468,7 @@ function generateDemonTargets(){
     boss.attackBonus = 0;
     if(boss.buff == "speed"){
         attackSpeedBonus = -100;
+        attackCountBonus += 2
         if(boss.swordCountered){
             attackCountBonus = -1;
         }
@@ -462,8 +499,8 @@ function generateDemonTargets(){
     boss.spearCountered = false;
     boss.swordCountered = false;
     boss.buffSickness = false;
-    num = random(5+attackCountBonus,6+attackCountBonus);
-    targetInterval = random(600 + attackSpeedBonus,700 + attackSpeedBonus);
+    num = random(6+attackCountBonus,7+attackCountBonus);
+    targetInterval = random(500 + attackSpeedBonus,650 + attackSpeedBonus);
     setTimeout(demonTargetLoop,targetInterval);
 }
 function generateDemonSlashes(){
@@ -506,7 +543,7 @@ currentNum = 0;
     boss.spearCountered = false;
     boss.swordCountered = false;
     boss.buffSickness = false;
-    num = random(5+attackCountBonus,6+attackCountBonus);
+    num = random(6+attackCountBonus,7+attackCountBonus);
     targetInterval = random(500 + attackSpeedBonus,600 + attackSpeedBonus);
     setTimeout(demonSlashLoop,targetInterval);
 }
@@ -524,6 +561,7 @@ function generateSlashes(){
                               if(boss.buff == "minion" || boss.buff == "haze"){
                                   boss.buffSickness = boss.buff;
                                   boss.buff = false;
+                                  demonAbilitySprite.visible = false;
                               }
                           }
                 Math.floor(netDamage);
@@ -535,7 +573,7 @@ function generateSlashes(){
                               characterSprite.changeAnimation('slash');
                               characterSprite.animation.frameDelay = 2;
                           }
-                transitionToDemon();
+//                transitionToDemon();
                 bossFight.phase = "damage";
                          transitionToDemon()
                          },targetInterval)
@@ -563,6 +601,7 @@ function smokeCreature(tag,defence,attack){
     this.alive = true;
 }
 function transitionToDemon(){
+    console.log(new Date())
     setTimeout(function(){bossFight.phase = "planning";
                           bossFight.playerTurn = false;
                           num = 0;
@@ -573,6 +612,14 @@ function transitionToDemon(){
                           ready = false;
                           if(boss.buff === false && boss.buffSickness === false){
                               boss.buff = random(demonBuffs)
+                              demonAbilitySprite.visible = true;
+                              demonAbilitySprite.changeAnimation(boss.buff);
+                              if(boss.buff == "barrier" || boss.buff == "minion"){
+                                  demonAbilitySprite.position.x = 1000;
+                              }else{
+                                  demonAbilitySprite.position.x = 1200;
+                              }
+                              demonAbilitySprite.animation.frameDelay = 8;
                           }
                           if(boss.health < 500 && boss.phase == 1){
                               boss.phase = 2;
@@ -580,6 +627,7 @@ function transitionToDemon(){
                           }else if(boss.health <=0){
                               boss.phase = "dead"
                               boss.buff = false;
+                              demonAbilitySprite.visible = false
                               demonSprite.changeAnimation('death');
                               demonSprite.animation.looping = false;
                               characterSprite.animation.frameDelay = 15;
@@ -687,6 +735,7 @@ function mousePressed(){
                     if(boss.buff == "speed" || boss.buff == "haze" || boss.buff == "barrier"){
                         boss.buffSickness = boss.buff;
                         boss.buff = false;
+                        demonAbilitySprite.visible = false
                     }
                 }
                 boss.health -= netDamage;
