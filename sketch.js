@@ -32,15 +32,22 @@ var idleRonin;
 var stuff;
 var song;
 var songs = [];
-var si;
-var pic;
-var spi;
+var sword;
+var pipe;
+var spear;
 var numHit = 0;
 var selectedIndex = 0;
+var gameStarted = false;
+var titleScreen;
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+}
  document.addEventListener("keydown", function(e) {
     if (e.keyCode == 13 && document.fullscreenElement === null) {
       document.getElementById("mainScreen").requestFullscreen();
         console.log(selectedIndex)
+        gameStarted = true;
+        titleScreen.visible = false
          songs[selectedIndex].play();
     songs[selectedIndex].loop()
          
@@ -60,8 +67,10 @@ function makeAnimationArrayFromRoot(root,frames){
 }
 function preload(){
     selectedIndex = Math.floor(random(0,4))
-//    si = loadImage('assets/icons/IMG_2286.png')
-//    pic = loadImage('asssets/icons/IMG_2287.png')
+    sword = loadImage('assets/icons/sword.png')
+    pipe= loadImage('assets/icons/pipe.png')
+    spear = loadImage('assets/icons/spear.png')
+
     
     song = loadSound("assets/FailtheFuture.mp3")
     songs.push(loadSound("assets/BattleofBurns.mp3"))
@@ -89,6 +98,8 @@ function preload(){
     characterSprite.addAnimation('death', 'assets/RIPronin/sprite_00.png', 'assets/RIPronin/sprite_01.png', 'assets/RIPronin/sprite_02.png', 'assets/RIPronin/sprite_03.png', 'assets/RIPronin/sprite_04.png', 'assets/RIPronin/sprite_05.png', 'assets/RIPronin/sprite_06.png', 'assets/RIPronin/sprite_07.png', 'assets/RIPronin/sprite_08.png', 'assets/RIPronin/sprite_09.png', 'assets/RIPronin/sprite_10.png', 'assets/RIPronin/sprite_11.png', 'assets/RIPronin/sprite_12.png', 'assets/RIPronin/sprite_13.png', 'assets/RIPronin/sprite_14.png', 'assets/RIPronin/sprite_15.png', 'assets/RIPronin/sprite_16.png', 'assets/RIPronin/sprite_17.png', 'assets/RIPronin/sprite_18.png', 'assets/RIPronin/sprite_19.png', 'assets/RIPronin/sprite_20.png')
 
 smokeDoubleSprite.addAnimation('death', 'assets/RIProninclone/sprite_00.png', 'assets/RIProninclone/sprite_01.png', 'assets/RIProninclone/sprite_02.png', 'assets/RIProninclone/sprite_03.png', 'assets/RIProninclone/sprite_04.png', 'assets/RIProninclone/sprite_05.png', 'assets/RIProninclone/sprite_06.png', 'assets/RIProninclone/sprite_07.png', 'assets/RIProninclone/sprite_08.png', 'assets/RIProninclone/sprite_09.png', 'assets/RIProninclone/sprite_10.png', 'assets/RIProninclone/sprite_11.png', 'assets/RIProninclone/sprite_12.png', 'assets/RIProninclone/sprite_13.png', 'assets/RIProninclone/sprite_14.png', 'assets/RIProninclone/sprite_15.png', 'assets/RIProninclone/sprite_16.png', 'assets/RIProninclone/sprite_17.png', 'assets/RIProninclone/sprite_18.png', 'assets/RIProninclone/sprite_19.png', 'assets/RIProninclone/sprite_20.png')
+    demonSprite.addAnimation('death', 'assets/RIPdemonboss/sprite_00.png', 'assets/RIPdemonboss/sprite_01.png', 'assets/RIPdemonboss/sprite_02.png', 'assets/RIPdemonboss/sprite_03.png', 'assets/RIPdemonboss/sprite_04.png', 'assets/RIPdemonboss/sprite_05.png', 'assets/RIPdemonboss/sprite_06.png', 'assets/RIPdemonboss/sprite_07.png', 'assets/RIPdemonboss/sprite_08.png', 'assets/RIPdemonboss/sprite_09.png', 'assets/RIPdemonboss/sprite_10.png', 'assets/RIPdemonboss/sprite_11.png', 'assets/RIPdemonboss/sprite_12.png', 'assets/RIPdemonboss/sprite_13.png', 'assets/RIPdemonboss/sprite_14.png', 'assets/RIPdemonboss/sprite_15.png', 'assets/RIPdemonboss/sprite_16.png', 'assets/RIPdemonboss/sprite_17.png', 'assets/RIPdemonboss/sprite_18.png', 'assets/RIPdemonboss/sprite_19.png')
+    
     
 //    smokeDoubleSprite.animation.frameDelay = 2;
 //    smokeDoubleSprite.changeAnimation('slash')
@@ -99,6 +110,13 @@ smokeDoubleSprite.addAnimation('death', 'assets/RIProninclone/sprite_00.png', 'a
 function setup() {
     
     canvas = createCanvas(windowWidth, windowHeight);
+    
+    titleScreen = createSprite(width/2,height/2,width,height)
+    titleScreen.addAnimation('stand','assets/intro/IMG_2270.JPG', 'assets/intro/IMG_2271.JPG', 'assets/intro/IMG_2272.JPG', 'assets/intro/IMG_2273.JPG', 'assets/intro/IMG_2274.JPG', 'assets/intro/IMG_2275.JPG','assets/intro/IMG_2276.JPG')
+    titleScreen.scale = 0.5;
+//    titleScreen.width = width;
+//    titleScreen.height = height;
+    titleScreen.animation.frameDelay = 12;
 //    frameRate(60)
 //    characterSprite = createSprite(300,500,500,500)
 //    smokeNinjaSprite = createSprite(600,500,500,500)//need to position later
@@ -115,8 +133,8 @@ function setup() {
 
 function draw() {
     resizeCanvas(windowWidth, windowHeight);
-    background("green");
-    
+    background("black");
+    if(gameStarted){
     if(bossFight.phase !== "dead"){
     push();
     if(bossFight.playerTurn && bossFight.phase == "planning"){
@@ -149,11 +167,21 @@ if((characterSprite.getAnimationLabel() == "slash" || characterSprite.getAnimati
     fill("red");
     if(bossFight.playerTurn && bossFight.phase == "planning"){
     ellipse(width/2 - 300,750,100,100)//pipe
+        image(pipe,width/2-415,690,240,240)
     ellipse(width/2, 750, 100,100)//battle
+        if(character.currentCreature == "boxer"){
+            image(spear,width/2-120,630,250,250)
+        }else if(character.currentCreature == "samurai"){
+            console.log("ss")
+            image(sword,width/2-140,590,300,300)
+
+        }
         if(selectingCreature){
             ellipse(width/2-425,625,100,100)//boxerSelection
+                        image(spear,width/2-545,505,250,250)
 //            ellipse(width/2 - 300, 625,100,100)//ninja selection
             ellipse(width/2 -175,625,100,100)//samurai selection
+            image(sword,width/2-315,465,300,300)
         }
     }
     
@@ -261,8 +289,15 @@ if((characterSprite.getAnimationLabel() == "slash" || characterSprite.getAnimati
     if(boss.buff !== false){
         push();
         textSize(50);
-        text(boss.buff,width/2,150)
+        var buffText = boss.buff;
+        text(buffText.capitalize(),width/2,150)
+        pop()
     }
+        
+        if(boss.phase == "dead"){
+            textSize(60)
+            text("Victory!",width/2-100,150)
+        }
 //    ellipse(width/2)
 }else{
     fill("red");
@@ -272,6 +307,9 @@ if((characterSprite.getAnimationLabel() == "slash" || characterSprite.getAnimati
     text("Game Over", width/2,height/2)
         drawSprites()
 
+}
+}else{
+    drawSprite(titleScreen)
 }
 }
 function createSelection(x,y,w,h,operation){
@@ -283,7 +321,7 @@ function createSelection(x,y,w,h,operation){
     
 }
 function demon(){
-    this.health = 1000;
+    this.health = 100;
     this.attack = 14;
     this.phase = 1;
     this.pierceDefence = 1;
@@ -426,7 +464,7 @@ function generateDemonTargets(){
     boss.buffSickness = false;
     num = random(5+attackCountBonus,6+attackCountBonus);
     targetInterval = random(600 + attackSpeedBonus,700 + attackSpeedBonus);
-    setTimeout(demonTargetLoop(),targetInterval);
+    setTimeout(demonTargetLoop,targetInterval);
 }
 function generateDemonSlashes(){
 currentNum = 0;
@@ -533,7 +571,6 @@ function transitionToDemon(){
                           currentNum = 0;
                           combo = 0;
                           ready = false;
-                          transitionToDefend();
                           if(boss.buff === false && boss.buffSickness === false){
                               boss.buff = random(demonBuffs)
                           }
@@ -542,18 +579,37 @@ function transitionToDemon(){
                               //transition
                           }else if(boss.health <=0){
                               boss.phase = "dead"
+                              boss.buff = false;
+                              demonSprite.changeAnimation('death');
+                              demonSprite.animation.looping = false;
+                              characterSprite.animation.frameDelay = 15;
+                              smokeDoubleSprite.animation.frameDelay = 15;
+                              demonSprite.animation.frameDelay = 15;
+                              songs[selectedIndex].setLoop(false)
                           }
+                          if(boss.phase != "dead"){
+                        transitionToDefend();
+                          }
+
                          },2000)
 }
 function transitionToDefend(){
-    setTimeout(function(){if(!(boss.phase == "dead")){bossFight.phase = "combat";slashes = [];punchTargets = [];currentNum = 0;num = 0;combo = 0;ready = false;if(boss.phase == 1){generateDemonSlashes()}else if(boss.phase == 2){generateDemonTargets()}}},500);
+    setTimeout(function(){if(!(boss.phase == "dead")){bossFight.phase = "combat";
+                                                      slashes = [];
+                                                      punchTargets = [];
+                                                      currentNum = 0;
+                                                      num = 0;
+                                                      combo = 0;
+                                                      ready = false;
+                                                      if(boss.phase == 1){generateDemonSlashes()}else if(boss.phase == 2){generateDemonTargets()}}},500);
 }
 function transitionToDeath(){bossFight.phase = "dead";
                             characterSprite.changeAnimation('death')
                              characterSprite.animation.looping = false
                              characterSprite.animation.frameDelay = 8;
                              demonSprite.visible = false;
-                             songs[selectedIndex].pause()
+                             songs[selectedIndex].setLoop(false)
+                             songs[selectedIndex].stop()
                              song.play()
                              song.loop()
                             }
